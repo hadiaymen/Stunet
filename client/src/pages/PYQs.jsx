@@ -1,10 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PYQS, getPdfViewUrl, getPdfDownloadUrl, DRIVE_FOLDER_URL } from '../data/driveData';
 
 /* ─── PDF Modal ─── */
 function PdfModal({ pyq, onClose }) {
-  const viewUrl = getPdfViewUrl(pyq);
+  const isDrive = !!pyq.driveId;
+  const driveFileUrl = isDrive
+    ? `https://drive.google.com/file/d/${pyq.driveId}/preview`
+    : null;
   const downloadUrl = getPdfDownloadUrl(pyq);
+  const openUrl = isDrive
+    ? `https://drive.google.com/file/d/${pyq.driveId}/view`
+    : null;
+
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  useEffect(() => { setIframeLoaded(false); }, [pyq.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -23,24 +32,28 @@ function PdfModal({ pyq, onClose }) {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <a
-              href={downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 bg-tertiary/10 text-tertiary rounded-xl hover:bg-tertiary/20 transition-colors text-sm font-grotesk"
-            >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              <span className="hidden sm:inline">Download</span>
-            </a>
-            <a
-              href={viewUrl || DRIVE_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 bg-tertiary/10 text-tertiary rounded-xl hover:bg-tertiary/20 transition-colors text-sm font-grotesk"
-            >
-              <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-              <span className="hidden sm:inline">Open</span>
-            </a>
+            {isDrive && (
+              <a
+                href={downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 bg-tertiary/10 text-tertiary rounded-xl hover:bg-tertiary/20 transition-colors text-sm font-grotesk"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                <span className="hidden sm:inline">Download</span>
+              </a>
+            )}
+            {isDrive && (
+              <a
+                href={openUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 bg-tertiary/10 text-tertiary rounded-xl hover:bg-tertiary/20 transition-colors text-sm font-grotesk"
+              >
+                <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                <span className="hidden sm:inline">Open in Drive</span>
+              </a>
+            )}
             <button
               onClick={onClose}
               className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/20 transition-colors text-on-surface-variant"
@@ -51,22 +64,34 @@ function PdfModal({ pyq, onClose }) {
         </div>
 
         {/* PDF Content */}
-        <div className="flex-1 overflow-hidden bg-white/5">
-          {viewUrl ? (
-            <iframe
-              src={viewUrl}
-              className="w-full h-full border-0"
-              title={`${pyq.subject} - ${pyq.year}`}
-              allow="fullscreen"
-            />
+        <div className="flex-1 overflow-hidden bg-white/5 relative">
+          {isDrive ? (
+            /* ── Google Drive embed ── */
+            <>
+              {!iframeLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+                  <div className="w-10 h-10 border-4 border-tertiary/30 border-t-tertiary rounded-full animate-spin" />
+                  <p className="text-on-surface-variant text-sm font-grotesk">Loading PDF…</p>
+                </div>
+              )}
+              <iframe
+                key={pyq.driveId}
+                src={driveFileUrl}
+                className={`w-full h-full border-0 transition-opacity duration-300 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+                title={`${pyq.subject} - ${pyq.year}`}
+                allow="autoplay; fullscreen"
+                onLoad={() => setIframeLoaded(true)}
+              />
+            </>
           ) : (
+            /* ── No Drive ID: not uploaded yet ── */
             <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
               <span className="material-symbols-outlined text-tertiary text-6xl">history_edu</span>
-              <div className="text-center">
+              <div className="text-center max-w-md">
                 <p className="font-grotesk text-on-surface text-xl mb-2">{pyq.subject}</p>
                 <p className="text-on-surface-variant text-sm mb-2">{pyq.year} · {pyq.regulation}</p>
-                <p className="text-on-surface-variant/60 text-sm mb-6">
-                  This file is available in the Google Drive folder.
+                <p className="text-on-surface-variant/60 text-sm mt-3">
+                  This question paper hasn't been uploaded to Google Drive yet.<br/>Check the Drive folder for the latest uploads.
                 </p>
               </div>
               <a
@@ -89,6 +114,13 @@ function PdfModal({ pyq, onClose }) {
 /* ─── PYQ Card ─── */
 function PYQCard({ pyq, onView }) {
   const hasFile = !!(pyq.driveId || pyq.localPath);
+  const viewUrl = getPdfViewUrl(pyq);
+
+  // Always open the modal — iframe works for both Drive URLs and Vite-served local files
+  const handleView = () => {
+    if (!hasFile) return;
+    onView(pyq);
+  };
 
   return (
     <div className="glass-card rounded-2xl p-5 hover:translate-y-[-3px] transition-all group flex flex-col gap-4">
@@ -107,7 +139,7 @@ function PYQCard({ pyq, onView }) {
       </div>
       <div className="flex gap-2 mt-auto">
         <button
-          onClick={() => onView(pyq)}
+          onClick={handleView}
           disabled={!hasFile}
           className={`flex-1 py-2 rounded-xl font-grotesk text-caption font-semibold transition-all flex items-center justify-center gap-1 ${
             hasFile

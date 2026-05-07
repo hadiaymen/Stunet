@@ -59,7 +59,12 @@ export default function Login() {
 
       {/* Top bar */}
       <header className="bg-white/10 backdrop-blur-xl border-b border-white/40 shadow-sm flex justify-between items-center w-full px-container-padding py-unit z-50">
-        <h1 className="font-grotesk text-h2 font-bold tracking-tight text-primary">StuNet</h1>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-primary/30 shadow shadow-primary/10">
+            <img src="/StuNet.png" alt="StuNet" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="font-grotesk text-h2 font-bold tracking-tight text-primary">StuNet</h1>
+        </div>
         <span className="material-symbols-outlined text-primary text-h2">security</span>
       </header>
 
@@ -67,8 +72,8 @@ export default function Login() {
       <main className="flex-grow flex items-center justify-center p-container-padding relative z-10">
         <div className="glass-card max-w-[440px] w-full rounded-[32px] p-stack-lg shadow-[0_32px_64px_-16px_rgba(0,103,99,0.1)] flex flex-col items-center">
           
-          <div className="mb-stack-md w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-white/50">
-            <span className="material-symbols-outlined text-[32px] filled">school</span>
+          <div className="mb-stack-md w-24 h-24 rounded-3xl overflow-hidden shadow-xl shadow-primary/20 ring-2 ring-primary/20">
+            <img src="/StuNet.png" alt="StuNet" className="w-full h-full object-cover" />
           </div>
           <div className="text-center mb-stack-lg">
             <h2 className="font-grotesk text-h2 text-on-surface mb-unit">Welcome to StuNet</h2>

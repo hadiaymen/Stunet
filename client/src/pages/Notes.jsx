@@ -1,10 +1,21 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { SUBJECTS, getPdfViewUrl, getPdfDownloadUrl, DRIVE_FOLDER_URL } from '../data/driveData';
 
 /* ─── PDF Viewer Modal ─── */
 function PdfModal({ note, onClose }) {
-  const viewUrl = getPdfViewUrl(note);
+  const isDrive = !!note.driveId;
+  const driveFileUrl = isDrive
+    ? `https://drive.google.com/file/d/${note.driveId}/preview`
+    : null;
   const downloadUrl = getPdfDownloadUrl(note);
+  const openUrl = isDrive
+    ? `https://drive.google.com/file/d/${note.driveId}/view`
+    : null;
+
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  // Reset load state when note changes
+  useEffect(() => { setIframeLoaded(false); }, [note.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -23,24 +34,28 @@ function PdfModal({ note, onClose }) {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <a
-              href={downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors text-sm font-grotesk"
-            >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              <span className="hidden sm:inline">Download</span>
-            </a>
-            <a
-              href={viewUrl || DRIVE_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors text-sm font-grotesk"
-            >
-              <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-              <span className="hidden sm:inline">Open</span>
-            </a>
+            {isDrive && (
+              <a
+                href={downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors text-sm font-grotesk"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                <span className="hidden sm:inline">Download</span>
+              </a>
+            )}
+            {isDrive && (
+              <a
+                href={openUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors text-sm font-grotesk"
+              >
+                <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                <span className="hidden sm:inline">Open in Drive</span>
+              </a>
+            )}
             <button
               onClick={onClose}
               className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/20 transition-colors text-on-surface-variant"
@@ -51,21 +66,34 @@ function PdfModal({ note, onClose }) {
         </div>
 
         {/* PDF Content */}
-        <div className="flex-1 overflow-hidden bg-white/5">
-          {viewUrl ? (
-            <iframe
-              src={viewUrl}
-              className="w-full h-full border-0"
-              title={note.title}
-              allow="fullscreen"
-            />
+        <div className="flex-1 overflow-hidden bg-white/5 relative">
+          {isDrive ? (
+            /* ── Google Drive embed ── */
+            <>
+              {!iframeLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
+                  <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <p className="text-on-surface-variant text-sm font-grotesk">Loading PDF…</p>
+                </div>
+              )}
+              <iframe
+                key={note.driveId}
+                src={driveFileUrl}
+                className={`w-full h-full border-0 transition-opacity duration-300 ${iframeLoaded ? 'opacity-100' : 'opacity-0'}`}
+                title={note.title}
+                allow="autoplay; fullscreen"
+                onLoad={() => setIframeLoaded(true)}
+              />
+            </>
           ) : (
+            /* ── No Drive ID: file not uploaded yet ── */
             <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
               <span className="material-symbols-outlined text-primary text-6xl">picture_as_pdf</span>
-              <div className="text-center">
+              <div className="text-center max-w-md">
                 <p className="font-grotesk text-on-surface text-xl mb-2">{note.title}</p>
-                <p className="text-on-surface-variant text-sm mb-6">
-                  This file is available in the Google Drive folder. Click below to open it.
+                <p className="text-on-surface-variant text-sm mb-1">{note.subject} · {note.module}</p>
+                <p className="text-on-surface-variant/60 text-sm mt-3">
+                  This file hasn't been uploaded to Google Drive yet.<br/>Check the Drive folder for the latest uploads.
                 </p>
               </div>
               <a
@@ -88,6 +116,12 @@ function PdfModal({ note, onClose }) {
 /* ─── Note Card ─── */
 function NoteCard({ note, onView }) {
   const hasFile = !!(note.driveId || note.localPath);
+
+  const handleView = () => {
+    if (!hasFile) return;
+    onView(note); // always open the modal
+  };
+
   return (
     <div className="glass-card rounded-2xl p-5 hover:translate-y-[-2px] transition-all group flex flex-col gap-3">
       <div className="flex items-start gap-3">
@@ -105,7 +139,7 @@ function NoteCard({ note, onView }) {
       </div>
       <div className="flex gap-2 mt-auto">
         <button
-          onClick={() => onView(note)}
+          onClick={handleView}
           disabled={!hasFile}
           className={`flex-1 py-2 rounded-xl font-grotesk text-caption font-semibold transition-all flex items-center justify-center gap-1 ${
             hasFile

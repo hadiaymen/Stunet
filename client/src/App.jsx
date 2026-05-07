@@ -22,7 +22,10 @@ function ProtectedRoute({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#E4DDD3' }}>
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full" />
+          <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-xl shadow-primary/20 ring-2 ring-primary/20 animate-pulse">
+            <img src="/StuNet.png" alt="StuNet" className="w-full h-full object-cover" />
+          </div>
+          <div className="animate-spin w-6 h-6 border-[3px] border-primary border-t-transparent rounded-full" />
           <p className="font-grotesk text-primary text-action">Loading StuNet...</p>
         </div>
       </div>

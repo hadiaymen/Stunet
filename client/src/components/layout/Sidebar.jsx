@@ -15,13 +15,13 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-72 z-40 hidden lg:flex flex-col gap-unit bg-surface/40 backdrop-blur-3xl border-r border-white/20 shadow-xl">
-      {/* Brand + Profile */}
-      <div className="p-container-padding flex items-center gap-stack-sm border-b border-white/10">
-        <div className="w-12 h-12 rounded-full border-2 border-primary/30 p--2 flex items-center justify-center bg-primary/10 overflow-hidden">
-  <img src="/logo.png" alt="StuNet Logo" className="w-full h-full object-cover" />
-</div>
+      {/* Brand */}
+      <div className="p-container-padding flex items-center gap-3 border-b border-white/10">
+        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shadow-primary/20 ring-2 ring-primary/30 flex-shrink-0">
+          <img src="/StuNet.png" alt="StuNet" className="w-full h-full object-cover" />
+        </div>
         <div>
-          <h3 className="font-grotesk text-action text-primary italic">Student</h3>
+          <h3 className="font-grotesk text-lg font-bold text-primary tracking-tight">StuNet</h3>
           <p className="font-inter text-caption text-on-surface-variant">Academic Companion</p>
           <span className="inline-flex items-center gap-1 text-[10px] text-primary">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />

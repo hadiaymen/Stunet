@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('StuNet_token', 'mock_jwt_token');
   };
 
-  const logout = () => {
+  const icon-512ut = () => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('StuNet_user');
@@ -51,9 +51,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, updateProfile }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, icon- 512ut, updateProfile }}>
+      { children }
+    </AuthContext.Provider >
   );
 }
 

@@ -7,11 +7,16 @@ export default function TopBar() {
 
   return (
     <header className="sticky top-0 z-50 flex justify-between items-center px-gutter py-unit max-w-full bg-surface/30 backdrop-blur-xl rounded-xl m-container-padding border border-white/40 shadow-[0_8px_32px_0_rgba(0,161,155,0.1)] lg:ml-80">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Mobile menu toggle */}
         <span className="lg:hidden material-symbols-outlined text-primary cursor-pointer">menu</span>
-        {/* Logo */}
-        <h1 className="font-grotesk text-h2 font-bold tracking-tight text-primary">StuNet</h1>
+        {/* icon-512 + Name */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl overflow-hidden ring-1 ring-primary/30 shadow shadow-primary/10 flex-shrink-0">
+            <img src="/StuNet.png" alt="StuNet" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="font-grotesk text-h2 font-bold tracking-tight text-primary">StuNet</h1>
+        </div>
       </div>
 
       <div className="flex items-center gap-gutter">
@@ -31,13 +36,13 @@ export default function TopBar() {
         </button>
 
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden">
-  <img 
-    src="/logo.png" 
-    alt="Avatar" 
-    className="w-full h-full object-cover scale-160" 
-  />
-</div>
+        <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 shadow shadow-primary/10">
+          <img
+            src="/StuNet.png"
+            alt="StuNet"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
     </header>
   );
